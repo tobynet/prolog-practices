@@ -1,5 +1,3 @@
-% http://swish.swi-prolog.org/p/TzBGzkkC.pl
-%
 % via http://nojiriko.asia/prolog/seikihyogen9_101.html
 %
 % 出典::正規表現 Part9 #101
@@ -34,21 +32,16 @@
 
 文字列置換(Input, X) :- 
     atom_chars(Input, List),
-    文字列置換(List, [], Result),
+    (  先頭部分のカッコを消す(List, Rest),
+   	途中のカッコを消す(Rest, [], Result) ),
     atomic_list_concat(Result, X).
 
-    %writef('%t => %t', [Input, X]), nl.
-    % swish では "No permission to call sandboxed" とのこと。
+先頭部分のカッコを消す(['(' | Tail], Tail) :- !.
 
-% 末尾再帰用の述語定義
-文字列置換([], X, X).
-文字列置換([Head|Tail], X, [ReplacedHead|Result]) :-
-    置換(Head, ReplacedHead),
-    文字列置換(Tail, X, Result).
-
-置換('(', '') :- !.
-置換(')', '') :- !.
-置換(X, X).
+途中のカッコを消す([')' | Tail], _, Tail) :- !.
+途中のカッコを消す([], X, X).
+途中のカッコを消す([Head | Tail], X, [Head | Result]) :- 
+    途中のカッコを消す(Tail, X, Result).
 
 main :-
     文字列置換(
@@ -61,22 +54,18 @@ main :-
 
     文字列置換(
         'あなたとジャバ,(今すぐ)ダウンロード',
-        'あなたとジャバ,(今すぐ)ダウンロード')
+        'あなたとジャバ,(今すぐ)ダウンロード'),
+
+    文字列置換(
+        '(あなたとジャバ,(今すぐ)ダウンロード',
+        'あなたとジャバ,(今すぐダウンロード'),
+
+    文字列置換(
+        '(あなたとジャバ,今すぐダウンロード',
+        '(あなたとジャバ,今すぐダウンロード')
 
     ; writeln('置換失敗!!').
 
-% 先頭部分のカッコを消す(_元, _結果) :-
-%     先頭部分のカッコを消す(_元, _結果, []).
-%
-% 先頭部分のカッコを消す(_元, _結果, []).
-% 先頭部分のカッコを消す(_元, _結果, [_先頭|_残り]) :-
-%     append(_先頭, _残り, _結果),
-%     先頭部分のカッコを消す(_元, _残り).
-%
-% main :-
-%     _対象 = '(hoge)あいうえお',
-%     先頭部分のカッコを消す(_対象, _結果),
-%     writeln(_結果).
 
 % swish 用にコメントアウト
 %:- main.
